@@ -74,10 +74,77 @@ If decisions 1–3 are not stable, **do not start build**. Slices 4–6 must be 
 
 ## Step D — Build slices (CSA agent output)
 
-> _To fill: paste CSA agent output here after running the Build prompt. Aim for 3-5 slices._
+**What is being proposed (one line):** four reviewable build/task slices that, together, allow architecture and risk review of an AI cost-estimate draft system *before any production code is written* — with the diff capture treated as a binding architectural constraint, not a feature.
 
-| Slice | Artifact or decision output | Depends on | Review evidence |
+### Slice overview
+
+| # | Slice | Reviewable artifact / decision output | Depends on | Review evidence |
+|---|---|---|---|---|
+| **B1** | **Estimation schema + diff taxonomy** specification | A formal JSON Schema for the AI output, paired with the diff taxonomy spec and 3–5 worked examples (AI draft → reviewer-corrected → categorized diff) | Plan decisions 1 & 2 (schema, diff taxonomy) | Domain expert + reviewer agree the schema captures every line-item type they edit; diff examples are unambiguous |
+| **B2** | **Reviewer surface + capture mechanism** decision | A decision memo: where the reviewer edits, how every edit is captured, what RBAC/identity model gates access, what fallback exists | B1 (need schema to know what we're capturing) | Reviewer can demonstrate an edit cycle on a paper prototype; security/IT signs off on identity & data residency; named owner accepts the surface |
+| **B3** | **AI run record + audit trail** data model | A data-model spec for "one AI run = one record": prompt, input, structured output, reviewer diff, decision (accept/reject/discard), timestamps, run-ID; plus retention & access policy | B1, B2 (record can't exist without schema or capture point) | Compliance/legal accepts retention; the record is sufficient to reproduce any past estimate; an "evidence" query on a sample dataset works |
+| **B4** | **Evaluation harness + adversarial check** design | A calibration-dataset spec, list of evaluators (rule-based + LLM-judge candidates), per-cohort metric definitions, and the adversarial "blind senior reviewer" protocol | B3 (no harness without records) | Senior reviewer agrees the metrics measure inspectable contribution (not just match-rate); evaluators are reproducible offline; protocol catches anchoring |
+
+> **Excluded** from these slices: app code, Azure subscription setup, CI/CD, model fine-tuning, UI mockups, cost modeling. These are downstream of architectural sign-off, not part of it.
+
+### Architecture review — what each slice surfaces
+
+**B1 — Schema + diff taxonomy**
+- *Context*: defines the only *shape* the AI is allowed to emit. Right abstraction = everything downstream cheap; wrong = uninterpretable diffs.
+- *Evaluation*: the schema is the substrate evaluators run on. Without it, "acceptance rate per category" is uncomputable.
+- *Risk*: over-fit schema (one reviewer's habit) → low generalizability. Under-specified → free-text → no mechanical diff.
+- *Architectural lever*: Azure OpenAI **structured outputs / JSON-schema response format** constrains the model to emit valid records. Decision: strict structured outputs vs post-validate? Strict mode constrains some schema constructs ([Learn](https://learn.microsoft.com/azure/ai-foundry/openai/how-to/structured-outputs#supported-schemas-and-limitations)).
+
+**B2 — Reviewer surface + capture mechanism**
+- *Tools / permissions*: every candidate (SharePoint/Excel, Power Apps, custom web, Foundry playground, M365 Copilot agent) has a different identity model, data residency story, and edit-capture mechanism.
+- *Human authority*: this slice is where "the human owns the final number" stops being a slogan and becomes a UI affordance.
+- *Risk*: most likely **silent** failure = reviewers exporting drafts to private spreadsheets. If the surface allows it, the diff promise is dead on arrival.
+- *Decision-binding warning*: picking the surface effectively picks the tenant story (M365 vs Azure) and the long-term identity boundary. **Reversibility cost: high.**
+
+**B3 — AI run record + audit trail**
+- *Memory*: this slice is *intentionally* the only memory in the system. Each record per-case, never re-fed to the model. That contract has to be defended in writing or it will erode under feature pressure.
+- *Governance*: retention windows, who can read records, how records are redacted. Where regulator-readability is built or lost.
+- *Hidden complexity*: Azure OpenAI emits diagnostic logs (request/response metrics, content-filter events) via Azure Monitor diagnostic settings ([Learn](https://learn.microsoft.com/azure/foundry/openai/monitor-openai-reference#resource-logs)) — but that is **operational telemetry**, not the estimate-business audit trail. *Inference*: the business audit record (input/output/reviewer diff) is the team's responsibility to design and store.
+- *Risk*: retrofitting the audit trail post-launch is the textbook irreversible decision. Defer = ship without evidence.
+
+**B4 — Evaluation harness + adversarial check**
+- *Evaluation*: Azure AI Foundry supports custom evaluators (code- and prompt-based) and dataset evaluation runs ([custom evaluators](https://learn.microsoft.com/azure/foundry/concepts/evaluation-evaluators/custom-evaluators), [cloud evaluation](https://learn.microsoft.com/azure/foundry/how-to/develop/cloud-evaluation#how-cloud-evaluation-works)). Credible home for acceptance-rate-per-category and discard-rate evaluators built on B3 records.
+- *Risk*: LLM-as-judge evaluators are tempting but **circular** — using a model to score a model. *Inference*: rule-based evaluators on the structured diff are more defensible for the first cycle.
+- *Anchoring detection*: Foundry's [agent tracing/observability](https://learn.microsoft.com/azure/foundry/observability/concepts/trace-agent-concept) captures per-run telemetry but does **not** detect reviewer anchoring on its own. The "blind senior reviewer" protocol is an *organizational* check the platform won't give for free.
+
+### Decision-binding choices
+
+| Decision | Slice | Reversibility cost | What it binds |
 |---|---|---|---|
-| | | | |
-| | | | |
-| | | | |
+| Strict JSON-schema structured outputs vs post-validate | B1 | Low–medium | All downstream parsing, diff mechanics, evaluator code |
+| Reviewer surface family (M365 / Power Platform / custom / Foundry-hosted) | B2 | **High** | Tenant boundary, identity model, day-2 ops surface, training cost |
+| Audit-record store (purpose-built vs piggyback on Azure Monitor / Log Analytics) | B3 | **High** | Retention, queryability, compliance posture, what "evidence" means in 12 months |
+| Evaluator family (rule-based first vs LLM-judge from day one) | B4 | Medium | Trustworthiness of metrics, ability to defend acceptance numbers |
+
+### Now vs before-scale
+
+**Acceptable now** (single jurisdiction, single estimate type, one team):
+- Manual cohort runs of evaluation harness, no scheduled cadence.
+- Single reviewer surface, single tenant.
+- Audit records in one store, single retention class.
+- Run records counted in hundreds, not millions.
+
+**Must be solved before scale:**
+- Multi-jurisdiction schema variation — today's "single jurisdiction" hides a future fork. Design B1 with that fork **named**, not built.
+- Reviewer-surface federation across teams/regions (B2 will be re-litigated).
+- Tier-2 evaluators (LLM-as-judge with calibration) and continuous evaluation in Foundry rather than batch.
+- Record volume — at scale, B3's choice of store stops being neutral; sizing & cost evolution must be modeled.
+- An **explicit governance gate** between "captured diffs" and "any form of model adaptation" — today we say no learning loop; at scale, the pressure to add one will be relentless.
+
+### Sources
+
+- Azure OpenAI structured outputs — schema constraints: <https://learn.microsoft.com/azure/ai-foundry/openai/how-to/structured-outputs#supported-schemas-and-limitations>
+- Azure AI Foundry custom evaluators: <https://learn.microsoft.com/azure/foundry/concepts/evaluation-evaluators/custom-evaluators>
+- Azure AI Foundry cloud evaluation: <https://learn.microsoft.com/azure/foundry/how-to/develop/cloud-evaluation#how-cloud-evaluation-works>
+- Azure OpenAI resource logs / diagnostic settings: <https://learn.microsoft.com/azure/foundry/openai/monitor-openai-reference#resource-logs>
+- Azure AI Foundry agent tracing / observability: <https://learn.microsoft.com/azure/foundry/observability/concepts/trace-agent-concept>
+- Cloud Adoption Framework — AI agent observability: <https://learn.microsoft.com/azure/cloud-adoption-framework/ai-agents/build-secure-process#4-agent-observability>
+
+**Inference flagged**: (a) Azure Monitor logs are not a substitute for the business audit record; (b) rule-based evaluators are more defensible than LLM-as-judge in the first cycle; (c) Foundry tracing does not detect reviewer anchoring.
+
+**CSA note:** the riskiest slice is **B2 (reviewer surface)** — it silently picks the tenant boundary. Second-riskiest is **B3 (audit record)** — most likely to be deferred, and the only one that, if deferred, makes the entire slice ungovernable.
