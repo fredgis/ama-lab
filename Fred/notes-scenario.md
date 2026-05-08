@@ -56,3 +56,26 @@ Outcome of Workbook §5 Step D for the three drafted files in `.github/`:
 
 ### One-liner takeaway
 Shared instructions hold the **posture**; the Strategy agent owns **how to frame decisions**; the CSA agent owns **how to stress-test Microsoft architecture with cited evidence**. No rule lives in two files.
+
+---
+
+## Lab recap — all 6 steps delivered
+
+Pushed to https://github.com/fredgis/AMA-lab on `main`.
+
+| # | Step | Deliverable | Key outcome |
+|---|---|---|---|
+| 1 | Scenario tensions | `Fred/notes-scenario.md` (this file) | 3 named tensions (Speed/Safety, Automation/Authority, Uniformity/Local variability) |
+| 2 | M365 Copilot personalization interview | `Fred/agent-profile-baseline.md` | Agent Operating Profile v1 (risk ranking Impact > Reversibility > Likelihood, anti cloud-agnostic stance, response shape) |
+| 3 | M365 Agent Builder observation | (conversational) | Observed grounding wall, no MCP, tenant-scoped surface |
+| 4 | GitHub Copilot CLI agents | `.github/copilot-instructions.md`, `.github/agents/strategy.agent.md`, `.github/agents/cloud-solution-architect.agent.md` | 3 files, repo-scoped, CSA wired to Microsoft Learn MCP (`tools: ["*"]` mandatory), layering check above |
+| 5 | Spec → Plan → Build | `Fred/spec-plan-build.md` | Step A anchor + Spec slice (Strategy) + Plan slice (Strategy, diff-first) + 4 build slices (CSA, Learn-grounded: schema/reviewer surface/audit/evaluation) |
+| 6 | Harness comparison + Foundry projection | `Fred/harness-comparison.md` | 6-layer table (Studio vs CLI), 3 architecture tradeoffs (governance locus, orchestration visibility, context scope), Foundry mapping (Tool Catalog / Threads-Runs / Connected Agents) |
+
+### Cross-step anchors
+- **Strategic anchor** (from Step 5 Plan): *value is only realized if the diff is captured.*
+- **Architectural anchor** (from Step 5 Build): the riskiest build slice is the **reviewer surface** — it silently picks the tenant boundary.
+- **Harness anchor** (from Step 6): low-code vs pro-code is **not** the real distinction. Control over context, tools, memory, permissions, reviewability — and where humans keep authority — is.
+
+### What this scenario is **about** in the end
+Producing **inspectable AI contribution under explicit human authority**, not autonomy. Every step refused to drift from that line.
