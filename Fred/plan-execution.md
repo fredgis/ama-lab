@@ -17,7 +17,7 @@ flowchart LR
 2. **M365 Copilot** : interview de personnalisation → sauver `agent-profile-baseline.md` (local).
 3. **M365 Agent Builder** : coller la baseline, tester grounding, observer le mur **Learn MCP**.
 4. **GitHub Copilot CLI** — voir [§ Étape 4 ci-dessous](#étape-4--github-copilot-cli-détaillée).
-5. **Spec → Plan → Build** : 1 spec, 1 plan, 3-5 slices.
+5. **Spec → Plan → Build** : 1 spec, 1 plan, 3-5 slices. Voir [§ Étape 5 ci-dessous](#étape-5--spec--plan--build-détaillée).
 6. **Comparer** les harnesses, projeter sur Foundry.
 
 ## Règles
@@ -83,3 +83,73 @@ Après les 3 fichiers, valider qui hérite quoi :
 - Lire et corriger les 3 fichiers — l'IA peut dupliquer ; trancher manuellement.
 - Pas d'orchestration : 2 agents existent, ils ne se passent **pas** la main automatiquement.
 - Ne **pas** committer `~/.copilot/...` dans le repo.
+
+---
+
+## Étape 5 — Spec → Plan → Build (détaillée)
+
+> Source : [`class/worksheets.md`](../class/worksheets.md) §6.
+> Inputs : tensions du scénario, baseline, observations Agent Builder, agents Strategy + CSA.
+> But : **séparer intent / approche / slices revues** — pas produire la solution finale.
+
+### Step A — Anchor (cadrage avant les prompts)
+Répondre aux 3 questions à toi-même :
+
+| Question | Ta réponse |
+|---|---|
+| Quel est le 1ᵉʳ slice que **tu choisis** d'attaquer dans le scénario ? | _ex: Generate first-pass cost estimate from a structured plan_ |
+| Quel concern est le plus à risque (context / harness / responsibility / orchestration / evaluation / system boundary) ? | _ex: evaluation + system boundary_ |
+| Quel work product visible rendrait l'amélioration inspectable ? | _ex: side-by-side diff estimate IA vs estimate expert_ |
+
+### Step B — Spec slice (avec l'agent Strategy)
+Dans CLI : `/agent strategy` puis :
+```text
+As the Strategy agent, use the customer scenario, baseline instructions, and lab observations to draft a concise specification slice.
+Do not solve the scenario yet.
+Separate the specification concerns from the solution.
+Use these categories: objective, primary users, user value, constraints, assumptions, success criteria, and out-of-scope boundaries.
+Write the result as Markdown.
+```
+Sauver dans `Fred/spec-slice.md`.
+
+### Step C — Plan slice (avec l'agent Strategy)
+```text
+As the Strategy agent, use the specification slice to draft a concise planning slice.
+Do not create the final architecture brief.
+Name the recommended approach, durable context needed, harness or control-surface assumptions, tradeoffs, validation method, and revisit trigger.
+Make clear which decisions must be made before build/task execution.
+Write the result as Markdown.
+```
+Sauver dans `Fred/plan-slice.md`.
+
+### Step D — Build slices (avec l'agent CSA)
+Dans CLI : `/agent cloud-solution-architect` puis :
+```text
+As the CSA agent, use the specification slice and planning slice to propose 3-5 reviewable build/task slices.
+Each slice should produce a reviewable artifact or decision output, name its dependency, and state what review evidence would prove it is useful.
+Make clear how each slice surfaces architecture and risk concerns so reviewers can inspect context, tools, permissions, memory, evaluation, and human authority before any final solution is implemented.
+Do not include app code, setup work, CI, or a final polished recommendation.
+Keep the slices architecture- and risk-reviewable.
+Write the result as Markdown.
+```
+Sauver dans `Fred/build-slices.md`.
+
+### Tableau attendu pour les slices
+| Build / task slice | Artifact ou decision output | Depends on | Review evidence |
+|---|---|---|---|
+| | | | |
+
+### "Good enough" means
+- 1 objectif **étroit** (pas la résolution du scénario complet)
+- contraintes **explicites** + assumptions tracées
+- approche + méthode de **validation** + revisit trigger
+- **3 à 5 slices** revues, chacune avec un artefact inspectable et son evidence
+
+### Pièges à éviter
+- Sauter directement à la solution finale → tu perds la valeur du Spec/Plan
+- Empiler 10 slices techniques → l'objectif est **revue d'architecture**, pas exécution
+- Inclure du code applicatif, CI, setup → hors scope ici
+- Laisser l'autorité humaine implicite — chaque slice doit dire **où l'humain décide**
+
+### One-liner à retenir
+> Strategy frame l'intent et les tradeoffs ; CSA verifie les risques d'architecture et propose des slices revues ; les humains gardent les décisions accountable.
