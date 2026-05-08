@@ -1,32 +1,32 @@
-# Notes — Scenario : AI-Assisted Estimation and Compliance
+# Notes — Scenario: AI-Assisted Estimation and Compliance
 
-> Source : [`class/scenario-handout.md`](../class/scenario-handout.md)
-> Étape 1 du plan — noter les tensions, **ne pas résoudre**.
+> Source: [`class/scenario-handout.md`](../class/scenario-handout.md)
+> Step 1 of the plan — capture tensions, **do not solve**.
 
-## 3 tensions clés
+## Three key tensions
 
-### 1. Vitesse vs Sécurité/Conformité
-Le client veut compresser les cycles (jours/semaines → minutes). Mais chaque erreur d'interprétation réglementaire = risque humain et juridique.
-→ *Aller plus vite augmente mécaniquement le risque résiduel.*
+### 1. Speed vs Safety/Compliance
+The customer wants to compress cycles (days/weeks → minutes). But every misinterpretation of regulation creates human and legal risk.
+→ *Going faster mechanically increases residual risk.*
 
-### 2. Automatisation vs Autorité humaine
-Vision client : IA qui *"lit les plans, applique les règles, génère l'estimation"*. Or :
-- l'**approbation finale doit rester humaine** ;
-- les corrections d'experts ne peuvent pas devenir un apprentissage automatique sans gouvernance/validation.
-→ *Plus l'IA "décide", moins on peut prouver qui est responsable.*
+### 2. Automation vs Human authority
+Customer vision: an AI that *"reads plans, applies rules, generates the estimate."* Yet:
+- **final approval must remain human-owned**;
+- expert corrections cannot become automatic learning without governance and validation.
+→ *The more the AI "decides," the harder it becomes to prove who is accountable.*
 
-### 3. Uniformité du modèle vs Variabilité locale
-Mêmes standards, **interprétations différentes** selon juridiction et régulateur.
-Une IA généraliste lisse ces différences.
-→ *Traiter les exigences locales comme uniformes = principal risque réglementaire.*
+### 3. Model uniformity vs Local variability
+Same standards, **different interpretations** depending on jurisdiction and regulator.
+A generalist AI smooths over those differences.
+→ *Treating local requirements as uniform is the dominant regulatory risk.*
 
-## Questions d'autorité humaine ouvertes
-- Qui signe l'approbation finale d'une estimation produite avec assistance IA ?
-- Sur quelles preuves un expert peut-il challenger / annuler une recommandation IA ?
-- Comment trace-t-on les corrections d'experts sans les rendre auto-apprenantes ?
+## Open human-authority questions
+- Who signs off on the final estimate produced with AI assistance?
+- On what evidence can an expert challenge / overturn an AI recommendation?
+- How do we trace expert corrections without turning them into self-learning?
 
-## Ce qu'on **ne fait pas** ici
-- Pas de design de système final.
-- Pas de choix d'architecture.
-- Pas de promesse de MVP.
-Ces tensions reviendront à l'étape 5 (Spec → Plan → Build) comme preuves.
+## What we are **not** doing here
+- No final system design.
+- No architecture choice.
+- No MVP commitment.
+These tensions will resurface at Step 5 (Spec → Plan → Build) as evidence.
