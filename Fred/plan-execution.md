@@ -153,3 +153,38 @@ Sauver dans `Fred/build-slices.md`.
 
 ### One-liner à retenir
 > Strategy frame l'intent et les tradeoffs ; CSA verifie les risques d'architecture et propose des slices revues ; les humains gardent les décisions accountable.
+
+---
+
+## Étape 6 — Harness comparison + Foundry projection (détaillée)
+
+> Source : [`class/worksheets.md`](../class/worksheets.md) §7.
+> Inputs : observations Steps 3 (Agent Builder) + 4 (Copilot CLI) + 5 (Spec/Plan/Build).
+> But : nommer **2 tradeoffs d'architecture** (pas de feature compare, pas de préférence d'UI) et projeter sur Foundry.
+
+### Step A — Comparer les 6 layers
+Remplir le tableau dans `Fred/harness-comparison.md` (déjà ébauché). 6 lignes : model+runtime, tools, context, permissions, memory, orchestration. Pour chaque, dire **ce que la surface rend explicite vs. implicite** — pas la liste des features.
+
+### Step B — Synthèse (4 questions)
+1. Qu'est-ce que **M365 Copilot Studio** rend plus facile ?
+2. Qu'est-ce que **Copilot CLI** rend plus facile ?
+3. Projection **Foundry** :
+   - Quels layers tiennent toujours ?
+   - Comment certains se ré-implémentent ?
+4. Quelle limite compte le plus pour le **first responsible slice** (cf. Step D du Spec/Plan/Build) ?
+
+### Closing reflection
+> Si on réussit, qu'est-ce que le système rend plus facile pour les humains, et qu'est-ce qu'il ne doit jamais décider à leur place ?
+
+### "Good enough" means
+- 2 tradeoffs d'architecture nommés (pas product preference)
+- ≥1 tradeoff parle de tool/MCP, context durability, role separation, review evidence, human handoff, ou ré-implémentation Foundry
+- Projection Foundry citée Learn
+
+### Pièges à éviter
+- Comparer le nombre de features → invalide
+- Préférence d'interface → invalide
+- Foundry = "Studio mais en mieux" → faux ; c'est un harness différent (Agent Service, Tool Catalog, Connected Agents)
+
+### One-liner à retenir
+> Low-code vs pro-code n'est **pas** la vraie distinction. Ce qui compte : qui contrôle context, tools, memory, permissions, reviewability — et où les humains gardent l'autorité.
