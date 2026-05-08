@@ -44,16 +44,31 @@ Compliance check automation, feedback learning, final approval, multi-jurisdicti
 
 ## Step C — Plan slice (Strategy agent output)
 
-> _To fill: paste Strategy agent output here after running the Plan prompt._
+**Decision being shaped:** what must be **decided and held stable** before any build slice is started, so that the spec's promise (inspectable contribution via diff) is not eroded by implementation drift. Direction and constraints — **not** an architecture brief.
 
 | Category | Content |
 |---|---|
-| Recommended approach | |
-| Durable context needed | |
-| Harness / control-surface assumptions | |
-| Tradeoffs | |
-| Validation / review method | |
-| Revisit trigger | |
+| **Recommended approach** | • **Diff-first delivery model**: the diff between AI draft and reviewer-corrected estimate is the **primary deliverable** of every cycle. The estimate is a means; the diff is the asset.<br>• **Single human-in-the-loop pattern**: AI produces → reviewer edits → diff is computed and stored. No second AI pass, no chained agents, no automatic re-prompting.<br>• **Narrow domain, broad observation**: one estimate type, one jurisdiction, one structured input format. Spend the saved scope on **observability** instead of features.<br>• **Explicit "AI does not know" surface**: AI must produce a *flagged-unknowns* section per estimate. Reviewer's handling of those flags is itself measured. |
+| **Durable context needed** | • Stable **estimation schema** (line item categories, units, expected fields). Diffability depends on it.<br>• Stable **reviewer working surface** (where they correct the draft). If reviewers correct outside the system, no diff is captured, no value lands.<br>• Stable **diff taxonomy** (missing / overestimated / underestimated / interpretation differs / out-of-schema).<br>• A small **calibration set** of historical reviewed estimates, agreed before build, that defines "good enough" empirically.<br>• Named **accountability owner** for the slice (one human, not a committee).<br><br>If any of these is "we'll figure it out later," the slice is **not ready to build**. |
+| **Harness / control-surface assumptions** | • Reviewer interacts with the draft inside a **controlled surface** (not over email, not in personal spreadsheets) — otherwise the diff is lost.<br>• AI has **no autonomous tool access** in this slice (no live data fetches, no compliance lookups, no file actions).<br>• A **kill switch / fallback to manual** must be available at any time without ceremony.<br>• All AI runs are **logged with input + output + reviewer diff** as a single record — audit trail and evaluation dataset.<br>• **No memory across cases**. Each estimate stands alone; persistent memory would smuggle in implicit learning. |
+| **Tradeoffs** | **Accept:**<br>• Slower scope expansion in exchange for clean evidence of AI contribution.<br>• Reviewer friction (reading drafts they may discard) in exchange for time savings on the keepers.<br>• Manual schema discipline in exchange for mechanical, non-interpretive diffs.<br><br>**Reject:**<br>• "Also flag compliance issues" — drags regulatory interpretation into a slice that explicitly excluded it.<br>• "Quietly retrain on reviewer corrections" — auto-learning loop without governance destroys reviewer trust and audit defensibility.<br>• "Confidence scores per line item" — with no evaluation foundation yet, confidence numbers are **fabricated trust**, worse than no number. |
+| **Validation method** | • **Per-estimate**: was a complete diff captured in the agreed taxonomy? Yes/no, every time.<br>• **Per-cohort**: acceptance rate by line-item category, time-to-first-draft trend, reviewer qualitative signal ("worth reading: yes/no").<br>• **Per-failure**: every estimate the reviewer discards entirely is a **named failure case** examined manually. Discard rate is itself a metric.<br>• **Adversarial check**: at agreed cadence, a senior reviewer estimates from scratch *without* seeing the AI draft, then compares. Detects whether AI is **anchoring** reviewers rather than helping them. |
+| **Revisit trigger** | Stop and re-plan if **any** of these fires:<br>• Diff capture rate drops below an agreed floor (reviewers correcting outside the controlled surface).<br>• Acceptance rate plateaus or degrades over consecutive cohorts.<br>• Reviewers report **anchoring** — accepting AI suggestions they would have rejected from a junior estimator.<br>• A reviewer-discarded estimate is found to have been used downstream anyway (control surface failure).<br>• Stakeholders propose adding compliance interpretation, multi-jurisdiction, or learning loop **inside this slice**. |
+
+### Decisions required before build/task execution
+
+| # | Decision | Owner type | Why it must be settled first |
+|---|---|---|---|
+| 1 | Estimation schema (fields, units, line-item taxonomy) | Domain expert | Defines what diff even means |
+| 2 | Diff taxonomy (the categories of difference we count) | Domain expert + reviewer | Without it, diffs are noise |
+| 3 | Controlled reviewer surface (where corrections happen) | Slice owner + IT | Without it, no diff is captured |
+| 4 | Calibration / "good enough" target band | Senior reviewer + business owner | Otherwise success is renegotiated post-hoc |
+| 5 | Single accountable human for the slice | Business sponsor | No accountability → no honest validation |
+| 6 | Logging + retention policy for AI-input/output/diff records | Slice owner + compliance | Audit trail; cannot be retrofitted |
+
+If decisions 1–3 are not stable, **do not start build**. Slices 4–6 must be named even if values are provisional.
+
+**Strategy note:** the plan deliberately spends the budget on **observability and discipline**, not features. The most likely failure of this slice is *not* "the AI estimates badly" — it is "we built the AI but never captured the diff cleanly, so we have no evidence either way." Make that the first thing the CSA agent must defend in Step D.
 
 ---
 
